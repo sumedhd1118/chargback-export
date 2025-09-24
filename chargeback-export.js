@@ -1,4 +1,3 @@
-// chargeback-standalone.cjs
 const ExcelJS = require('exceljs');
 const path = require('path');
 const { createClient } = require('@clickhouse/client');
