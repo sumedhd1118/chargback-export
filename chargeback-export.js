@@ -13,6 +13,7 @@ const chClient = createClient({
   database: process.env.CLK_HS_DB || 'default',
 });
 
+
 async function exportChargebacks(month, startDate, endDate) {
   let sql = `
     SELECT 
@@ -35,6 +36,7 @@ async function exportChargebacks(month, startDate, endDate) {
 
   const resultSet = await chClient.query({ query: sql, format: 'JSONEachRow' });
   const data = await resultSet.json();
+  console.log(data)
   return data;
 }
 
@@ -74,6 +76,8 @@ async function exportToExcel(data, month, startDate, endDate) {
     : `Chargeback_${startDate}_to_${endDate}.xlsx`;
 
   const filePath = path.join(process.cwd(), fileName);
+  console.log('Current working directory:', process.cwd());
+  console.log('Saving file as:', filePath);
   await workbook.xlsx.writeFile(filePath);
   console.log(`Excel exported: ${filePath}`);
 }
@@ -104,8 +108,16 @@ const args = yargs(hideBin(process.argv))
         }
       });
     }
+    else if (args.month || (args.startDate && args.endDate)) {
+      const data = await exportChargebacks(args.month, args.startDate, args.endDate);
+      await exportToExcel(data, args.month, args.startDate, args.endDate);
+    }
+    else {
+      console.log('Please provide either --cron or --month or --startDate & --endDate');
+    }
   } catch (err) {
     console.error('Error:', err.message);
   }
 })();
+
 
